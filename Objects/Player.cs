@@ -1,43 +1,28 @@
 ﻿using System;
+using ToineElo.Configuration;
 using Microsoft.ML.Probabilistic.Models;
 using Microsoft.ML.Probabilistic.Distributions;
 
 namespace ToineElo.Objects
 {
-    public class Player
-    {
-        public Gaussian Skill { get; set; }
-
-        public Player(double initialMean, double initialStDev)
-        {
-            Skill = new Gaussian(initialMean, initialStDev);
-        }
-    }
-
     class Program
     {
         static void Main(string[] args)
         {
-            Player player = new Player(25.0, 8.333);
-            Console.WriteLine($"Player's Skill Mean: {player.Skill.GetMean()}");
-            Console.WriteLine($"Player's Skill Standard Deviation: {player.Skill.GetVariance()}");
+            ToineEloEnvironment environment = new ToineEloEnvironment();
+            Player Jets = environment.CreatePlayer();
+            Player Eagles = environment.CreatePlayer();
+            Console.WriteLine($"Jets' Skill Mean: {Jets.Skill.GetMean()}");
+            Console.WriteLine($"Jets' Skill Standard Deviation: {Jets.Skill.GetVariance()}");
+            Console.WriteLine($"Eagles' Skill Mean: {Eagles.Skill.GetMean()}");
+            Console.WriteLine($"Eagles' Skill Standard Deviation: {Eagles.Skill.GetVariance()}");
+            environment.Rate1vs1(Jets, Eagles, true);
+            Console.WriteLine($"Jets' Skill Mean: {Jets.Skill.GetMean()}");
+            Console.WriteLine($"Jets' Skill Standard Deviation: {Jets.Skill.GetVariance()}");
+            Console.WriteLine($"Eagles' Skill Mean: {Eagles.Skill.GetMean()}");
+            Console.WriteLine($"Eagles' Skill Standard Deviation: {Eagles.Skill.GetVariance()}");
             Console.WriteLine("Press any key to exit.");
             Console.ReadKey();
-        }
-
-        static Gaussian UpdatePlayerSkill(Gaussian playerSkill, Gaussian opponentSkill, bool outcome)
-        {
-            Variable<double> playerSkillVar = Variable.Random(playerSkill);
-            Variable<double> opponentSkillVar = Variable.Random(opponentSkill);
-
-            Variable<bool> playerWins = playerSkillVar > opponentSkillVar;
-
-            playerWins.ObservedValue = outcome;
-
-            InferenceEngine engine = new InferenceEngine();
-            Gaussian updatedPlayerSkill = engine.Infer<Gaussian>(playerSkillVar);
-
-            return updatedPlayerSkill;
         }
     }
 }
